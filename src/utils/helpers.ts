@@ -42,7 +42,7 @@ export function writeIncrementalReport(reportDir: string, data: any) {
   }
   const newReport = { ...currentReport, ...data };
   fs.writeFileSync(reportPath, JSON.stringify(newReport, null, 2));
-  emitStep('system', `💾 Incremental report saved to disk`);
+  emitStep('parse', 'complete', { message: `💾 Incremental report saved to disk` });
 }
 
 export const delay = (ms: number) => new Promise(res => setTimeout(res, ms));

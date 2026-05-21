@@ -1,13 +1,12 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useAuditStore } from '../store/useAuditStore';
 import { useCyberSynth } from '../hooks/useCyberSynth';
 import { CallGraph } from './CallGraph';
 import { BadgeViewer } from './BadgeViewer';
 import { FindingsList } from './FindingsList';
 import { PipelineTracker } from './PipelineTracker';
-import { Play, RotateCcw, AlertTriangle, Cpu, Shield, FileCode, ChevronDown } from 'lucide-react';
+import { Play, RotateCcw } from 'lucide-react';
 import { useSkyper } from '../hooks/useSkyper';
-import { useAnime } from '../hooks/useAnime';
 
 const TerminalLine = ({ log }: { log: { type: string, text: string } }) => {
   const { displayedText, startDecoding } = useSkyper(log.text, { duration: 600, fps: 60 });
@@ -50,7 +49,6 @@ export const LiveAuditSimulator: React.FC = () => {
 
   const { playHover, playClick, startScanHum, stopScanHum, playAlertChime } = useCyberSynth();
   const terminalEndRef = useRef<HTMLDivElement | null>(null);
-  const [openFindingIdx, setOpenFindingIdx] = useState<number | null>(null);
 
   // Auto scroll logs
   useEffect(() => {
@@ -85,31 +83,13 @@ export const LiveAuditSimulator: React.FC = () => {
   const handleReset = () => {
     playClick();
     resetSimulator();
-    setOpenFindingIdx(null);
   };
 
   const handleTemplateChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     playClick();
     setTemplate(e.target.value as 'vault' | 'borrower' | 'staking');
-    setOpenFindingIdx(null);
   };
 
-  const getStepNodeClass = (idx: number) => {
-    if (currentStep > idx) return 'border-emerald-400 bg-cyber-card text-emerald-400 shadow-glow-emerald';
-    if (currentStep === idx) return 'border-cyan-400 bg-cyber-cardHover text-cyan-400 shadow-glow-cyan animate-pulse';
-    return 'border-white/5 bg-cyber-dark text-gray-500';
-  };
-
-  const getStepIcon = (idx: number) => {
-    const props = { className: "w-4 h-4" };
-    switch (idx) {
-      case 0: return <FileCode {...props} />;
-      case 1: return <Cpu {...props} />;
-      case 2: return <AlertTriangle {...props} />;
-      case 3: return <Shield {...props} />;
-      default: return <FileCode {...props} />;
-    }
-  };
 
   const lineCount = code.split('\n').length;
   const lineNumbers = Array.from({ length: lineCount }, (_, i) => i + 1);
@@ -198,22 +178,21 @@ export const LiveAuditSimulator: React.FC = () => {
       <div className="lg:col-span-7 flex flex-col gap-6">
         <PipelineTracker simStatus={simStatus} currentStep={currentStep} connectorWidth={connectorWidth} />
 
-          {/* Typewriter Scrollable Console Terminal */}
-          <div className="bg-[#030305] border border-white/5 rounded-xl p-5 h-[230px] flex flex-col overflow-hidden shadow-inner">
-            <div className="flex justify-between items-center text-[10px] text-gray-500 font-bold uppercase font-fira pb-3 border-b border-white/5 mb-3">
-              <span className="flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
-                CONSOLE LOGGER
-              </span>
-              <span>TELEMETRY Tele_V1</span>
-            </div>
+        {/* Typewriter Scrollable Console Terminal */}
+        <div className="bg-[#030305] border border-white/5 rounded-xl p-5 h-[230px] flex flex-col overflow-hidden shadow-inner">
+          <div className="flex justify-between items-center text-[10px] text-gray-500 font-bold uppercase font-fira pb-3 border-b border-white/5 mb-3">
+            <span className="flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+              CONSOLE LOGGER
+            </span>
+            <span>TELEMETRY Tele_V1</span>
+          </div>
 
-            <div className="flex-1 overflow-y-auto pr-1 flex flex-col gap-2.5 font-fira text-xs scroll-smooth">
-              {terminalLogs.map((log, idx) => (
-                <TerminalLine key={idx} log={log} />
-              ))}
-              <div ref={terminalEndRef} />
-            </div>
+          <div className="flex-1 overflow-y-auto pr-1 flex flex-col gap-2.5 font-fira text-xs scroll-smooth">
+            {terminalLogs.map((log, idx) => (
+              <TerminalLine key={idx} log={log} />
+            ))}
+            <div ref={terminalEndRef} />
           </div>
         </div>
       </div>

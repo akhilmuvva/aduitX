@@ -6,6 +6,8 @@ export interface StackItem {
   steps: string[];
 }
 
+import type { Finding } from '@auditx/types';
+
 export const STACK_DETAILS: Record<string, StackItem> = {
   frontend: {
     title: "Frontend Layer",
@@ -191,15 +193,7 @@ contract SecureStaking is ReentrancyGuard, Ownable {
 }`
 };
 
-export interface Finding {
-  title: string;
-  severity: 'critical' | 'high' | 'medium';
-  tool: string;
-  loc: string;
-  desc: string;
-  vulnCode: string;
-  fixCode: string;
-}
+
 
 export interface GraphNode {
   name: string;
@@ -252,22 +246,29 @@ export const SIMULATOR_DATA: Record<string, SimulatorReport> = {
     network: "Arbitrum One (L2)",
     findings: [
       {
+        id: "vln-01",
         title: "Reentrancy Vulnerability (External Call Before Balance Cleared)",
         severity: "critical",
-        tool: "Slither check-reentrancy",
-        loc: "VulnerableVault.sol: L13-17",
-        desc: "The contract calls 'msg.sender.call' to withdraw funds before updating the internal mapping 'balances[msg.sender] = 0'. A malicious user can write a recursive contract that calls 'withdraw()' again inside their callback, draining the entire vault balance.",
-        vulnCode: `(bool success, ) = msg.sender.call{value: bal}("");\nbalances[msg.sender] = 0;`,
-        fixCode: `balances[msg.sender] = 0;\n(bool success, ) = msg.sender.call{value: bal}("");`
+        tool: "slither",
+        file: "VulnerableVault.sol",
+        line: 13,
+        description: "The contract calls 'msg.sender.call' to withdraw funds before updating the internal mapping 'balances[msg.sender] = 0'. A malicious user can write a recursive contract that calls 'withdraw()' again inside their callback, draining the entire vault balance.",
+        remediation: "Update internal state BEFORE making the external call.",
+        patch: `balances[msg.sender] = 0;\n(bool success, ) = msg.sender.call{value: bal}("");`,
+        cvss: 8.8
       },
       {
+        id: "vln-02",
         title: "Missing Zero Check on Deposit address",
         severity: "high",
-        tool: "Mythril SWC-105",
-        loc: "VulnerableVault.sol: L8-10",
-        desc: "Depositing addresses are not checked. Though depositors are tracked via msg.sender, raw address queries might cause state lockups if interfaces pass unverified data streams.",
-        vulnCode: `function deposit() external payable {`,
-        fixCode: `function deposit() external payable {\n    require(msg.sender != address(0), "No zero address");`
+        tool: "mythril",
+        swc: "SWC-105",
+        file: "VulnerableVault.sol",
+        line: 8,
+        description: "Depositing addresses are not checked. Though depositors are tracked via msg.sender, raw address queries might cause state lockups if interfaces pass unverified data streams.",
+        remediation: "Add require check for address(0).",
+        patch: `function deposit() external payable {\n    require(msg.sender != address(0), "No zero address");`,
+        cvss: 7.0
       }
     ],
     graphNodes: [
@@ -313,22 +314,29 @@ export const SIMULATOR_DATA: Record<string, SimulatorReport> = {
     network: "Base Goerli L2",
     findings: [
       {
+        id: "vln-03",
         title: "Unprotected Callback Operational Entry Point",
         severity: "high",
-        tool: "Slither access-control",
-        loc: "FlashLoanReceiver.sol: L12-21",
-        desc: "The critical callback interface 'executeOperation()' does not verify the address calling the function. Anyone can invoke this entry point directly, tricking the contract into processing internal assets without authorization.",
-        vulnCode: `function executeOperation(...) external returns (bool) {`,
-        fixCode: `function executeOperation(...) external returns (bool) {\n    require(msg.sender == pool, "Only verified pool allowed");`
+        tool: "slither",
+        file: "FlashLoanReceiver.sol",
+        line: 12,
+        description: "The critical callback interface 'executeOperation()' does not verify the address calling the function. Anyone can invoke this entry point directly, tricking the contract into processing internal assets without authorization.",
+        remediation: "Ensure the pool is verified before allowing the function to proceed.",
+        patch: `function executeOperation(...) external returns (bool) {\n    require(msg.sender == pool, "Only verified pool allowed");`,
+        cvss: 7.5
       },
       {
+        id: "vln-04",
         title: "Implicit Variable Ownership Mismatch",
         severity: "medium",
-        tool: "Mythril SWC-101",
-        loc: "FlashLoanReceiver.sol: L8-10",
-        desc: "The owner address is successfully mapped during the constructor but not guarded dynamically in external integrations. Changes in network state might cause unintended control transfer.",
-        vulnCode: `owner = msg.sender;`,
-        fixCode: `owner = msg.sender;\n    // Ensure custom modifiers guard dynamic edits`
+        tool: "mythril",
+        swc: "SWC-101",
+        file: "FlashLoanReceiver.sol",
+        line: 8,
+        description: "The owner address is successfully mapped during the constructor but not guarded dynamically in external integrations. Changes in network state might cause unintended control transfer.",
+        remediation: "Ensure custom modifiers guard dynamic edits.",
+        patch: `owner = msg.sender;\n    // Ensure custom modifiers guard dynamic edits`,
+        cvss: 5.5
       }
     ],
     graphNodes: [
@@ -373,13 +381,16 @@ export const SIMULATOR_DATA: Record<string, SimulatorReport> = {
     network: "Arbitrum One (L2)",
     findings: [
       {
+        id: "vln-05",
         title: "Standard Code Optimization Recommendation",
         severity: "medium",
-        tool: "Slither gas-optimization",
-        loc: "SecureStaking.sol: L13-16",
-        desc: "The state mapping stakedBalances reads repeatedly. Caching it locally can reduce gas usage during high staking interactions.",
-        vulnCode: `stakedBalances[msg.sender] += msg.value;`,
-        fixCode: `uint256 currentStake = stakedBalances[msg.sender];\nstakedBalances[msg.sender] = currentStake + msg.value;`
+        tool: "slither",
+        file: "SecureStaking.sol",
+        line: 13,
+        description: "The state mapping stakedBalances reads repeatedly. Caching it locally can reduce gas usage during high staking interactions.",
+        remediation: "Read into memory before applying logic.",
+        patch: `uint256 currentStake = stakedBalances[msg.sender];\nstakedBalances[msg.sender] = currentStake + msg.value;`,
+        cvss: 1.2
       }
     ],
     graphNodes: [

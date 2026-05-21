@@ -1,26 +1,24 @@
 import { useEffect, useRef } from 'react';
-import anime, { AnimeParams, AnimeInstance } from 'animejs';
+import { animate, type JSAnimation } from 'animejs';
+
+type AnimateParams = Parameters<typeof animate>[1];
 
 export const useAnime = (
-  params: AnimeParams,
-  dependencies: any[] = [],
+  params: AnimateParams & { targets: string | Element | Element[] | NodeList },
+  dependencies: unknown[] = [],
   playOnMount = true
 ) => {
-  const animeRef = useRef<AnimeInstance | null>(null);
+  const animeRef = useRef<JSAnimation | null>(null);
 
   useEffect(() => {
-    // Merge autoplay configuration safely
-    const animationParams = {
-      ...params,
+    const { targets, ...rest } = params;
+    animeRef.current = animate(targets as any, {
+      ...rest,
       autoplay: playOnMount,
-    };
-
-    animeRef.current = anime(animationParams);
+    });
 
     return () => {
-      if (animeRef.current) {
-        anime.remove(params.targets as any);
-      }
+      animeRef.current?.cancel();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, dependencies);

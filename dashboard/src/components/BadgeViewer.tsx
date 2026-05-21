@@ -24,7 +24,7 @@ export const BadgeViewer: React.FC<BadgeViewerProps> = ({ report, templateName }
   }, [report]);
 
   useAnime({
-    targets: cardRef.current,
+    targets: '.badge-viewer-card',
     translateY: [50, 0],
     opacity: [0, 1],
     scale: [0.9, 1.03],
@@ -108,7 +108,7 @@ export const BadgeViewer: React.FC<BadgeViewerProps> = ({ report, templateName }
       <div className="flex flex-col items-center justify-center py-4 perspective-[1000px]">
         <div
           ref={cardRef}
-          className={`relative w-[280px] h-[390px] rounded-3xl p-6 flex flex-col justify-between overflow-hidden cursor-grab active:cursor-grabbing select-none transition-all duration-150 border backdrop-blur-xl shadow-2xl ${
+          className={`badge-viewer-card relative w-[280px] h-[390px] rounded-3xl p-6 flex flex-col justify-between overflow-hidden cursor-grab active:cursor-grabbing select-none transition-all duration-150 border backdrop-blur-xl shadow-2xl ${
             report.status === 'safe'
               ? 'border-emerald-400/40 shadow-[0_30px_60px_rgba(0,0,0,0.6),0_0_30px_rgba(16,185,129,0.15)]'
               : report.status === 'warning'

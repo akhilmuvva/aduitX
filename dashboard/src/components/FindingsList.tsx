@@ -1,16 +1,8 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { useAnime } from '../hooks/useAnime';
 
-interface Finding {
-  severity: string;
-  title: string;
-  tool: string;
-  desc: string;
-  loc: string;
-  vulnCode: string;
-  fixCode: string;
-}
+import type { Finding } from '@auditx/types';
 
 export const FindingsList: React.FC<{ findings: Finding[] }> = ({ findings }) => {
   const [openFindingIdx, setOpenFindingIdx] = useState<number | null>(null);
@@ -22,7 +14,7 @@ export const FindingsList: React.FC<{ findings: Finding[] }> = ({ findings }) =>
     opacity: [0, 1],
     easing: 'easeOutExpo',
     duration: 800,
-    delay: (el: any, i: number) => i * 150
+    delay: (_el: any, i: number) => i * 150
   }, [findings]);
 
   return (
@@ -61,9 +53,9 @@ export const FindingsList: React.FC<{ findings: Finding[] }> = ({ findings }) =>
           {/* Accordion Body Comparative Diffs */}
           {openFindingIdx === idx && (
             <div className="px-6 pb-6 pt-2 border-t border-white/5 bg-black/25 flex flex-col gap-4 animate-[fadeIn_0.3s_ease-out]">
-              <div className="text-xs text-gray-400 leading-relaxed font-outfit mt-2">{finding.desc}</div>
+              <div className="text-xs text-gray-400 leading-relaxed font-outfit mt-2">{finding.description}</div>
               <div className="text-[10px] text-indigo-400 font-bold font-fira bg-indigo-500/5 border border-indigo-500/10 rounded-lg px-3 py-1.5 w-fit">
-                📍 Location: {finding.loc}
+                📍 {finding.file}{finding.line ? `:L${finding.line}` : ''}
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-2">
@@ -73,7 +65,7 @@ export const FindingsList: React.FC<{ findings: Finding[] }> = ({ findings }) =>
                     VULNERABLE CODE BLOCK
                   </div>
                   <pre className="p-4 text-xs text-rose-300 overflow-x-auto whitespace-pre leading-normal">
-                    <code>{finding.vulnCode}</code>
+                    <code>{finding.patch ?? '—'}</code>
                   </pre>
                 </div>
 
@@ -83,7 +75,7 @@ export const FindingsList: React.FC<{ findings: Finding[] }> = ({ findings }) =>
                     REMEDIATION PATCH
                   </div>
                   <pre className="p-4 text-xs text-emerald-300 overflow-x-auto whitespace-pre leading-normal">
-                    <code>{finding.fixCode}</code>
+                    <code>{finding.remediation}</code>
                   </pre>
                 </div>
               </div>

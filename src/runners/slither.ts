@@ -4,7 +4,7 @@ import { emitStep } from '../events.js';
 import { spawnAsync, sanitizePath, writeIncrementalReport } from '../utils/helpers.js';
 
 export async function runSlither(targetPath: string, reportDir: string) {
-  emitStep('system', `Initializing Slither static analysis on ${path.basename(targetPath)}`);
+  emitStep('slither', 'active', { message: `Initializing Slither static analysis on ${path.basename(targetPath)}` });
   const safePath = sanitizePath(targetPath);
   
   try {
@@ -17,21 +17,21 @@ export async function runSlither(targetPath: string, reportDir: string) {
       const match = output.match(/\{[\s\S]*\}/);
       if (match) parsed = JSON.parse(match[0]);
     } catch (e) {
-      emitStep('warning', `Failed to parse Slither JSON output.`);
+      emitStep('slither', 'error', { message: `Failed to parse Slither JSON output.` });
     }
 
     if (parsed && parsed.success && parsed.results && parsed.results.detectors) {
       const issues = parsed.results.detectors.length;
-      emitStep(issues > 0 ? 'warning' : 'success', `Slither completed: Found ${issues} potential vulnerabilities`);
+      emitStep('slither', 'complete', { message: `Slither completed: Found ${issues} potential vulnerabilities` });
       writeIncrementalReport(reportDir, { slither: parsed.results.detectors });
       return parsed.results.detectors;
     } else {
-      emitStep('warning', `Slither ran but no standard detectors array found. Assuming 0 issues.`);
+      emitStep('slither', 'error', { message: `Slither ran but no standard detectors array found. Assuming 0 issues.` });
       writeIncrementalReport(reportDir, { slither: [] });
       return [];
     }
   } catch (error: any) {
-    emitStep('error', `Slither execution failed: ${error.message}`);
+    emitStep('slither', 'error', { message: `Slither execution failed: ${error.message}` });
     writeIncrementalReport(reportDir, { slitherError: error.message });
     return [];
   }

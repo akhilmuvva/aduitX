@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useRef } from 'react';
 import { Cpu, FileCode, AlertTriangle, Shield, CheckCircle, Search, Server, Key } from 'lucide-react';
 import { useAnime } from '../hooks/useAnime';
 
@@ -26,7 +26,7 @@ export const PipelineTracker: React.FC<PipelineTrackerProps> = ({ simStatus, cur
     targets: '.pipeline-node',
     scale: [0, 1],
     opacity: [0, 1],
-    delay: (el: any, i: number) => i * 100,
+    delay: (_el: any, i: number) => i * 100,
     easing: 'spring(1, 80, 10, 0)',
   }, []);
 
@@ -59,7 +59,7 @@ export const PipelineTracker: React.FC<PipelineTrackerProps> = ({ simStatus, cur
         <div className="absolute top-[21px] left-[6%] right-[6%] h-0.5 bg-white/5 z-0">
           <div
             className="h-full bg-gradient-to-r from-indigo-500 via-cyan-400 to-emerald-400 shadow-[0_0_8px_rgba(99,102,241,0.5)] transition-all duration-500"
-            style={{ width: \`\${connectorWidth}%\` }}
+            style={{ width: `${connectorWidth}%` }}
           />
         </div>
 
@@ -68,7 +68,7 @@ export const PipelineTracker: React.FC<PipelineTrackerProps> = ({ simStatus, cur
           return (
             <div key={idx} className="pipeline-node relative z-10 flex flex-col items-center gap-2 opacity-0">
               <div
-                className={\`w-10 h-10 rounded-full border flex items-center justify-center transition-all duration-500 \${getStepNodeClass(idx)}\`}
+                className={`w-10 h-10 rounded-full border flex items-center justify-center transition-all duration-500 ${getStepNodeClass(idx)}`}
               >
                 <Icon className="w-4 h-4" />
               </div>

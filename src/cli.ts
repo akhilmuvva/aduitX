@@ -55,11 +55,11 @@ async function main() {
   console.log('═'.repeat(60) + '\n');
 
   if ((opts.eas || opts.mint) && !process.env.PRIVATE_KEY) {
-    emitStep('error', 'Missing PRIVATE_KEY in .env required for --eas or --mint');
+    emitStep('parse', 'error', { message: 'Missing PRIVATE_KEY in .env required for --eas or --mint' });
     process.exit(1);
   }
   if (opts.ai && !process.env.ANTHROPIC_API_KEY && !process.env.OPENAI_API_KEY) {
-    emitStep('error', 'Missing ANTHROPIC_API_KEY in .env for AI triage');
+    emitStep('parse', 'error', { message: 'Missing ANTHROPIC_API_KEY in .env for AI triage' });
     process.exit(1);
   }
 
@@ -67,13 +67,13 @@ async function main() {
   const targetInfo = await resolveTarget(targetArg);
   
   if (targetInfo.files.length === 0) {
-    emitStep('error', 'No .sol files found in target.');
+    emitStep('parse', 'error', { message: 'No .sol files found in target.' });
     process.exit(1);
   }
 
   const reportDir = path.join(process.cwd(), 'auditx-reports', `scan_${Date.now()}`);
   fs.mkdirSync(reportDir, { recursive: true });
-  emitStep('system', `Report directory created: ${reportDir}`);
+  emitStep('parse', 'active', { message: `Report directory created: ${reportDir}` });
 
   // 1. Static Scan
   const slitherFindings = await runSlither(targetInfo.files[0], reportDir);
@@ -114,7 +114,7 @@ async function main() {
   }
 
   emitProgress('COMPLETED');
-  emitStep('success', 'Audit Pipeline Complete.');
+  emitStep('parse', 'complete', { message: 'Audit Pipeline Complete.' });
   
   // Keep alive if server is running
   if (!opts.server) {
@@ -123,7 +123,7 @@ async function main() {
 }
 
 main().catch(err => {
-  emitStep('error', `Fatal Pipeline Error: ${err.message}`);
+  emitStep('parse', 'error', { message: `Fatal Pipeline Error: ${err.message}` });
   emitProgress('ERROR');
   console.error(err);
   if (!opts.server) process.exit(1);

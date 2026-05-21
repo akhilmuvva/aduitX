@@ -4,7 +4,7 @@ import { emitStep } from '../events.js';
 import { spawnAsync, sanitizePath, writeIncrementalReport } from '../utils/helpers.js';
 
 export async function runSurya(contractFiles: string[], reportDir: string) {
-  emitStep('system', `Mapping Contract Call-Graph AST via Surya...`);
+  emitStep('surya', 'active', { message: `Mapping Contract Call-Graph AST via Surya...` });
   
   if (!contractFiles || contractFiles.length === 0) return { nodes: [], edges: [] };
 
@@ -28,12 +28,12 @@ export async function runSurya(contractFiles: string[], reportDir: string) {
       }
     });
 
-    emitStep('success', `Surya AST map generated: ${nodes.length} nodes, ${edges.length} edges`);
+    emitStep('surya', 'complete', { message: `Surya AST map generated: ${nodes.length} nodes, ${edges.length} edges` });
     const suryaData = { graphNodes: nodes, graphEdges: edges, rawDot: stdout };
     writeIncrementalReport(reportDir, { surya: suryaData });
     return suryaData;
   } catch (error: any) {
-    emitStep('error', `Surya execution failed: ${error.message}`);
+    emitStep('surya', 'error', { message: `Surya execution failed: ${error.message}` });
     writeIncrementalReport(reportDir, { suryaError: error.message });
     return { nodes: [], edges: [] };
   }

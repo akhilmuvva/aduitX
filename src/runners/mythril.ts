@@ -4,10 +4,10 @@ import { emitStep } from '../events.js';
 import { spawnAsync, sanitizePath, writeIncrementalReport } from '../utils/helpers.js';
 
 export async function runMythril(contractFiles: string[], reportDir: string) {
-  emitStep('system', `Booting Mythril symbolic execution solver...`);
+  emitStep('mythril', 'active', { message: `Booting Mythril symbolic execution solver...` });
   
   if (!contractFiles || contractFiles.length === 0) {
-    emitStep('warning', 'No solidity files passed to Mythril.');
+    emitStep('mythril', 'error', { message: 'No solidity files passed to Mythril.' });
     return [];
   }
 
@@ -22,21 +22,21 @@ export async function runMythril(contractFiles: string[], reportDir: string) {
       const match = output.match(/\{[\s\S]*\}/);
       if (match) parsed = JSON.parse(match[0]);
     } catch (e) {
-      emitStep('warning', `Failed to parse Mythril JSON output.`);
+      emitStep('mythril', 'error', { message: `Failed to parse Mythril JSON output.` });
     }
 
     if (parsed && parsed.issues) {
       const issues = parsed.issues.length;
-      emitStep(issues > 0 ? 'warning' : 'success', `Mythril completed: Found ${issues} constraints/violations`);
+      emitStep('mythril', 'complete', { message: `Mythril completed: Found ${issues} constraints/violations` });
       writeIncrementalReport(reportDir, { mythril: parsed.issues });
       return parsed.issues;
     } else {
-      emitStep('warning', `Mythril ran but no issues array found. Assuming 0 issues.`);
+      emitStep('mythril', 'error', { message: `Mythril ran but no issues array found. Assuming 0 issues.` });
       writeIncrementalReport(reportDir, { mythril: [] });
       return [];
     }
   } catch (error: any) {
-    emitStep('error', `Mythril execution failed: ${error.message}`);
+    emitStep('mythril', 'error', { message: `Mythril execution failed: ${error.message}` });
     writeIncrementalReport(reportDir, { mythrilError: error.message });
     return [];
   }

@@ -4,11 +4,11 @@ import { writeIncrementalReport, delay } from '../utils/helpers.js';
 import fetch from 'node-fetch';
 
 export async function runAIAnalysis(findings: any[], contractFiles: string[], reportDir: string) {
-  emitStep('system', `Packaging heuristics for AI Triage (Claude Sonnet)...`);
+  emitStep('ai-triage', 'active', { message: `Packaging heuristics for AI Triage (Claude Sonnet)...` });
 
   const API_KEY = process.env.ANTHROPIC_API_KEY;
   if (!API_KEY) {
-    emitStep('warning', `No ANTHROPIC_API_KEY found, skipping AI triage.`);
+    emitStep('ai-triage', 'error', { message: `No ANTHROPIC_API_KEY found, skipping AI triage.` });
     return { summary: "Skipped", riskLevel: "unknown", detailedFindings: [] };
   }
 
@@ -61,7 +61,7 @@ export async function runAIAnalysis(findings: any[], contractFiles: string[], re
   while (attempt < maxRetries) {
     attempt++;
     try {
-      emitStep('system', `Calling Anthropic API (Attempt ${attempt}/${maxRetries})...`);
+      emitStep('ai-triage', 'active', { message: `Calling Anthropic API (Attempt ${attempt}/${maxRetries})...` });
       
       const response = await fetch("https://api.anthropic.com/v1/messages", {
         method: "POST",
@@ -87,18 +87,18 @@ export async function runAIAnalysis(findings: any[], contractFiles: string[], re
       const cleanJson = rawText.substring(jsonStart, jsonEnd + 1);
       const result = JSON.parse(cleanJson);
       
-      emitStep('success', `AI Triage complete. Assessed Risk: ${result.riskLevel.toUpperCase()}`);
+      emitStep('ai-triage', 'complete', { message: `AI Triage complete. Assessed Risk: ${result.riskLevel.toUpperCase()}` });
       writeIncrementalReport(reportDir, { aiAnalysis: result });
       return result;
 
     } catch (error: any) {
-      emitStep('warning', `AI API Error: ${error.message}`);
+      emitStep('ai-triage', 'error', { message: `AI API Error: ${error.message}` });
       if (attempt >= maxRetries) {
-        emitStep('error', `Max retries reached for AI Triage. Falling back to raw findings.`);
+        emitStep('ai-triage', 'error', { message: `Max retries reached for AI Triage. Falling back to raw findings.` });
         writeIncrementalReport(reportDir, { aiAnalysisError: error.message });
         return { summary: "AI Triage Failed", riskLevel: "unknown", detailedFindings: [] };
       }
-      emitStep('system', `Retrying in ${backoffDelay}ms...`);
+      emitStep('ai-triage', 'active', { message: `Retrying in ${backoffDelay}ms...` });
       await delay(backoffDelay);
       backoffDelay *= 2;
     }
