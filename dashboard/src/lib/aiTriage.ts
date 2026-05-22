@@ -101,16 +101,16 @@ JSON Schema to return:
 const GEMINI_MODEL = 'gemini-flash-latest';
 const GEMINI_API_BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
 
-export async function runBrowserAITriage(params: {
-  contractName: string;
-  solidityCode: string;
-  slitherOutput?: string;
-  mythrilOutput?: string;
-  suryaOutput?: string;
-  apiKey: string;
-  onProgress?: (msg: string) => void;
-}): Promise<AuditXReport> {
-  const { contractName, solidityCode, slitherOutput, mythrilOutput, suryaOutput, apiKey, onProgress } = params;
+export async function runAiTriage(
+  files: { contractName: string; sol: string; slither?: string; mythril?: string; surya?: string },
+  onProgress?: (msg: string, type?: 'info' | 'success' | 'warning' | 'error') => void
+): Promise<AuditXReport> {
+  const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+  if (!apiKey) {
+    throw new Error('Server misconfiguration: VITE_GEMINI_API_KEY is not set in environment variables.');
+  }
+
+  const { contractName, sol, slither, mythril, surya } = files;
 
   onProgress?.('[GEMINI] Constructing multi-tool telemetry matrix...');
 
@@ -118,16 +118,16 @@ export async function runBrowserAITriage(params: {
 CONTRACT NAME: ${contractName}
 
 === SOLIDITY SOURCE CODE ===
-${solidityCode}
+${sol}
 
 === SLITHER STATIC ANALYSIS OUTPUT ===
-${slitherOutput || '(not provided — perform static analysis from source code only)'}
+${slither || '(not provided — perform static analysis from source code only)'}
 
 === MYTHRIL SYMBOLIC EXECUTION OUTPUT ===
-${mythrilOutput || '(not provided — infer from source code patterns)'}
+${mythril || '(not provided — infer from source code patterns)'}
 
 === SURYA CALL GRAPH OUTPUT ===
-${suryaOutput || '(not provided — derive call graph topology from source code)'}
+${surya || '(not provided — derive call graph topology from source code)'}
 
 Perform full AuditX security analysis. Return ONLY the raw JSON object matching the schema — no markdown, no extra text.
 `.trim();
@@ -197,11 +197,3 @@ Perform full AuditX security analysis. Return ONLY the raw JSON object matching 
 
   return parsed;
 }
-
-/** Store Gemini API key in localStorage (browser-only, never sent to any backend) */
-export const ApiKeyStore = {
-  get: () => localStorage.getItem('auditx_gemini_key') || '',
-  set: (key: string) => localStorage.setItem('auditx_gemini_key', key),
-  clear: () => localStorage.removeItem('auditx_gemini_key'),
-  isSet: () => !!localStorage.getItem('auditx_gemini_key'),
-};

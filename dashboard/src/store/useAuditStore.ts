@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { runBrowserAITriage, ApiKeyStore, type AuditXReport } from '../lib/aiTriage';
+import { runAiTriage, type AuditXReport } from '../lib/aiTriage';
 // AI engine: Google Gemini 2.0 Flash (browser-native, zero-server)
 
 export type SimStatus = 'IDLE' | 'RUNNING' | 'COMPLETED' | 'ERROR';
@@ -24,10 +24,6 @@ interface AuditState {
   // File uploads
   files: UploadedFiles;
 
-  // API key (persisted in localStorage)
-  apiKey: string;
-  apiKeyVisible: boolean;
-
   // Audit state
   simStatus: SimStatus;
   terminalLogs: TerminalLog[];
@@ -37,8 +33,6 @@ interface AuditState {
   setView: (view: 'blueprint' | 'simulator') => void;
   setSelectedLayer: (layer: string | null) => void;
   setFile: (slot: keyof UploadedFiles, data: { name: string; content: string } | null) => void;
-  setApiKey: (key: string) => void;
-  toggleApiKeyVisible: () => void;
   resetAudit: () => void;
   runAudit: () => Promise<void>;
 }
@@ -53,14 +47,10 @@ export const useAuditStore = create<AuditState>((set, get) => ({
 
   files: { sol: null, slither: null, mythril: null, surya: null },
 
-  apiKey: ApiKeyStore.get(),
-  apiKeyVisible: false,
-
   simStatus: 'IDLE',
   terminalLogs: [
     { type: 'system', text: 'AuditX Decentralized Engine ready — powered by Gemini 2.0 Flash.', ts: Date.now() },
     { type: 'system', text: 'Upload your .sol file — Slither/Mythril/Surya JSON outputs are optional.', ts: Date.now() },
-    { type: 'system', text: 'Your Gemini API key is stored in localStorage only. It never leaves your browser.', ts: Date.now() },
   ],
   report: null,
 
@@ -69,13 +59,6 @@ export const useAuditStore = create<AuditState>((set, get) => ({
 
   setFile: (slot, data) =>
     set((s) => ({ files: { ...s.files, [slot]: data } })),
-
-  setApiKey: (key) => {
-    ApiKeyStore.set(key);
-    set({ apiKey: key });
-  },
-
-  toggleApiKeyVisible: () => set((s) => ({ apiKeyVisible: !s.apiKeyVisible })),
 
   resetAudit: () =>
     set({
@@ -87,14 +70,10 @@ export const useAuditStore = create<AuditState>((set, get) => ({
     }),
 
   runAudit: async () => {
-    const { files, apiKey } = get();
+    const { files } = get();
 
     if (!files.sol) {
       set((s) => ({ ...addLog(s, { type: 'error', text: 'No .sol file loaded. Upload a Solidity contract to continue.' }) }));
-      return;
-    }
-    if (!apiKey.trim()) {
-      set((s) => ({ ...addLog(s, { type: 'error', text: 'Gemini API key is required. Get one free at aistudio.google.com and enter it above.' }) }));
       return;
     }
 
@@ -108,16 +87,17 @@ export const useAuditStore = create<AuditState>((set, get) => ({
     });
 
     try {
-      const report = await runBrowserAITriage({
-        contractName: files.sol.name.replace('.sol', ''),
-        solidityCode: files.sol.content,
-        slitherOutput: files.slither?.content,
-        mythrilOutput: files.mythril?.content,
-        suryaOutput: files.surya?.content,
-        apiKey,
-        onProgress: (msg) =>
-          set((s) => ({ ...addLog(s, { type: 'system', text: msg }) })),
-      });
+      const report = await runAiTriage(
+        {
+          contractName: files.sol.name.replace('.sol', ''),
+          sol: files.sol.content,
+          slither: files.slither?.content,
+          mythril: files.mythril?.content,
+          surya: files.surya?.content,
+        },
+        (msg, type = 'info') =>
+          set((s) => ({ ...addLog(s, { type, text: msg }) }))
+      );
 
       const status = report.analyticsSummary.certificationStatus;
       const risk = report.analyticsSummary.riskClassification;

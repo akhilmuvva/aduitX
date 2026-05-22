@@ -3,7 +3,7 @@ import { useAuditStore, type UploadedFiles } from '../store/useAuditStore';
 import { useCyberSynth } from '../hooks/useCyberSynth';
 import {
   Play, RotateCcw, Upload, FileCode, FileJson,
-  Eye, EyeOff, Key, ShieldCheck, ShieldX, AlertTriangle,
+  ShieldCheck, ShieldX, AlertTriangle,
   CheckCircle2, Loader2,
 } from 'lucide-react';
 
@@ -187,15 +187,12 @@ const ResultBadge = ({ report }: { report: NonNullable<ReturnType<typeof useAudi
 ────────────────────────────────────────────── */
 export const LiveAuditSimulator: React.FC = () => {
   const {
-    files, apiKey, apiKeyVisible,
-    simStatus, terminalLogs, report,
-    setFile, setApiKey, toggleApiKeyVisible,
-    resetAudit, runAudit,
+    files, simStatus, terminalLogs, report,
+    setFile, resetAudit, runAudit,
   } = useAuditStore();
 
   const { playHover, playClick } = useCyberSynth();
   const terminalEndRef = useRef<HTMLDivElement | null>(null);
-  const [apiKeyDraft, setApiKeyDraft] = useState(apiKey);
 
   useEffect(() => {
     terminalEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -209,55 +206,12 @@ export const LiveAuditSimulator: React.FC = () => {
     reader.readAsText(file);
   }, [setFile]);
 
-  const handleSaveKey = () => {
-    setApiKey(apiKeyDraft.trim());
-    playClick();
-  };
-
   const isRunning = simStatus === 'RUNNING';
 
   return (
     <div className="flex flex-col gap-6 mt-4 animate-[fadeIn_0.4s_ease-out]">
 
-      {/* ── API KEY SETUP PANEL ── */}
-      <div className="bg-cyber-card border border-white/5 rounded-2xl p-5 backdrop-blur-md">
-        <div className="flex items-center gap-2 mb-3">
-          <Key className="w-4 h-4 text-indigo-400" />
-          <span className="text-xs font-bold text-gray-200 font-outfit uppercase tracking-wider">Gemini API Key</span>
-          <span className="ml-auto text-[9px] text-gray-600 font-fira">Stored in your browser only — never transmitted to any server</span>
-        </div>
-        <div className="flex gap-2">
-          <div className="relative flex-1">
-            <input
-              type={apiKeyVisible ? 'text' : 'password'}
-              value={apiKeyDraft}
-              onChange={(e) => setApiKeyDraft(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSaveKey()}
-              placeholder="AIza..."
-              className="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-2.5 text-xs text-gray-200 font-fira outline-none focus:border-indigo-400/50 placeholder:text-gray-600 transition-colors pr-10"
-            />
-            <button
-              onClick={toggleApiKeyVisible}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 hover:text-gray-300 transition-colors"
-            >
-              {apiKeyVisible ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-            </button>
-          </div>
-          <button
-            onClick={handleSaveKey}
-            onMouseEnter={playHover}
-            className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold font-outfit rounded-xl border border-indigo-400/25 transition-all duration-300 flex items-center gap-2 whitespace-nowrap"
-          >
-            <CheckCircle2 className="w-3.5 h-3.5" />
-            Save Key
-          </button>
-        </div>
-        {ApiKeyStore.isSet() && (
-          <p className="text-[10px] text-emerald-400 font-fira mt-2 flex items-center gap-1">
-            <CheckCircle2 className="w-3 h-3" /> Gemini API key saved in localStorage
-          </p>
-        )}
-      </div>
+
 
       {/* ── MAIN GRID ── */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -521,5 +475,4 @@ export const LiveAuditSimulator: React.FC = () => {
   );
 };
 
-// Re-export for backwards compat
-import { ApiKeyStore } from '../lib/aiTriage';
+// Re-export removed
