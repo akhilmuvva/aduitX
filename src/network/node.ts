@@ -15,7 +15,7 @@ export async function createAgentNode(listenPort: number = 0) {
     addresses: {
       listen: [`/ip4/0.0.0.0/tcp/${listenPort}`]
     },
-    transports: [tcp()],
+    transports: [tcp() as any],
     connectionEncrypters: [noise()],
     streamMuxers: [yamux()],
     services: {

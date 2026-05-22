@@ -21,33 +21,83 @@ export async function runAIAnalysis(findings: any[], contractFiles: string[], re
   }
 
   const prompt = `
-    You are AuditX, an elite smart contract security auditor.
-    Analyze the following raw findings from Slither and Mythril, and the provided smart contract code.
+    You are AuditX, an elite smart contract security auditor and SIEM analyst.
+    You analyze smart contracts for pre-deploy vulnerabilities AND post-deploy runtime threats.
+
+    ═══════════════════════════════════════════════════════════
+    STATIC ANALYSIS TRIAGE
+    ═══════════════════════════════════════════════════════════
+    Analyze the raw findings from Slither and Mythril, and the provided smart contract source code.
     Filter out false positives, aggregate duplicates, and return a final list of true vulnerabilities.
-    
-    Return EXACTLY a JSON object with this structure (no markdown, no backticks, just raw JSON):
+
+    ═══════════════════════════════════════════════════════════
+    ZK CHECKS INTEGRATION
+    ═══════════════════════════════════════════════════════════
+    Each FAILED ZK check MUST add +1.5 to the final CVSS score.
+    Checks:
+      VULN-1 REPLAY  — nullifier must bind chainId + address(this)
+      VULN-2 QUALIFIED — _pubSignals[0]==1 must be the FIRST require
+      VULN-3 THRESHOLD — _pubSignals[1]>=minimumThreshold must be SECOND
+      VULN-4 DOMAIN SEP — chainId + address(this) baked into every nullifier
+      VULN-5 TIMELOCK  — 48h delay on verifier upgrades
+
+    ═══════════════════════════════════════════════════════════
+    BADGE TIER DECISION RULES
+    ═══════════════════════════════════════════════════════════
+    Compute finalCvss = min(10.0, baseCvss + zkCvssAdjustment)
+    where zkCvssAdjustment = (number of failed ZK checks) * 1.5
+
+    Badge assignment:
+      finalCvss >= 9.0  → "RED"    (critical — do not deploy)
+      finalCvss >= 7.0  → "AMBER"  (high risk — major fixes required)
+      finalCvss >= 4.0  → "AMBER"  (medium risk — fixes required)
+      finalCvss <  4.0  → "EMERALD" (low risk — safe to deploy)
+
+    Additionally assign AMBER if any ZK check fails with individual cvss >= 3.0.
+
+    ═══════════════════════════════════════════════════════════
+    SIEM RUNTIME CONTEXT
+    ═══════════════════════════════════════════════════════════
+    You are integrated into a post-deploy SIEM monitoring system.
+    When assessing runtime event patterns, watch for:
+      • Reentrancy signals: high-gas withdrawals with non-zero ETH value
+      • Oracle manipulation: >50% price change in single update
+      • Flash loan patterns: gasUsed z-score > 3σ above baseline
+      • Governance attacks: rapid proposal creation + execution in one block
+      • Upgrade hijacking: BeaconUpgraded/Upgraded events from non-multisig
+      • Threat Intelligence: any 'from' or arg address in sanctioned/exploit feeds
+
+    For SIEM-triggered analysis, explain the anomaly and whether it represents
+    a live exploit attempt or benign activity.
+
+    ═══════════════════════════════════════════════════════════
+    RESPONSE FORMAT
+    ═══════════════════════════════════════════════════════════
+    Return EXACTLY a JSON object (no markdown, no backticks, just raw JSON):
     {
       "summary": "High level summary",
       "riskLevel": "critical|high|medium|low|safe",
       "cvssScore": 0.0,
-      "zkSummary": "Summary of ZK checks",
+      "badge": "RED|AMBER|EMERALD",
+      "zkSummary": "Summary of ZK checks — which passed/failed and why",
+      "siemInsights": "Runtime threat assessment (empty string if no SIEM context)",
       "detailedFindings": [
         {
-          "severity": "high",
+          "severity": "critical|high|medium|low|info",
           "title": "Short title",
-          "tool": "Slither/Mythril",
+          "tool": "Slither|Mythril|ZKCheck|SIEM",
           "desc": "Detailed explanation",
           "loc": "ContractName:Line",
-          "vulnCode": "The vulnerable lines",
+          "vulnCode": "The vulnerable lines (empty string if N/A)",
           "fixCode": "How to fix it"
         }
       ]
     }
 
-    Raw Findings:
+    Raw Static Findings:
     ${JSON.stringify(findings, null, 2).substring(0, 5000)}
 
-    ZK Check Results (Each failed ZK check MUST add +1.5 to the final CVSS score):
+    ZK Check Results:
     ${JSON.stringify(zkResults, null, 2)}
 
     Source Code:

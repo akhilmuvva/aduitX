@@ -1,6 +1,7 @@
 export type StepId =
   | 'parse' | 'slither' | 'mythril' | 'surya'
   | 'ai-triage' | 'ipfs' | 'eas' | 'mint'
+  | 'siem-classify' | 'siem-anomaly' | 'siem-intel' | 'siem-alert'
 
 export type StepStatus = 'pending' | 'active' | 'complete' | 'error'
 
@@ -30,9 +31,12 @@ export interface AuditReport {
   contractHash: string
   timestamp: number
   cvssScore: number
-  badgeGrade: 'emerald' | 'amber' | null
+  /** RED = critical (≥9.0), AMBER = high/medium, EMERALD = low/safe, null if not yet determined */
+  badgeGrade: 'red' | 'amber' | 'emerald' | null
   ipfsCid: string | null
   easUid: string | null
   txHash: string | null
   findings: Finding[]
+  /** Number of SIEM alerts generated during post-deploy monitoring */
+  siemAlertCount?: number
 }
