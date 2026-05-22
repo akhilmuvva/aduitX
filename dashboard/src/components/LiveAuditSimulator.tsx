@@ -404,7 +404,7 @@ export const LiveAuditSimulator: React.FC = () => {
               </span>
               <span className="flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
-                Gemini 2.0 Flash
+                Gemini Flash Latest
               </span>
               <span className="flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />

@@ -97,8 +97,8 @@ JSON Schema to return:
   }
 }`;
 
-// Use gemini-2.0-flash for fast, cost-effective analysis
-const GEMINI_MODEL = 'gemini-2.0-flash';
+// Use gemini-flash-latest (fastest, confirmed working)
+const GEMINI_MODEL = 'gemini-flash-latest';
 const GEMINI_API_BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
 
 export async function runBrowserAITriage(params: {
@@ -134,11 +134,14 @@ Perform full AuditX security analysis. Return ONLY the raw JSON object matching 
 
   onProgress?.('[GEMINI] Transmitting to Gemini analysis engine (browser-native, zero-server)...');
 
-  const url = `${GEMINI_API_BASE}/${GEMINI_MODEL}:generateContent?key=${apiKey}`;
+  const url = `${GEMINI_API_BASE}/${GEMINI_MODEL}:generateContent`;
 
   const response = await fetch(url, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'X-goog-api-key': apiKey,
+    },
     body: JSON.stringify({
       system_instruction: {
         parts: [{ text: SYSTEM_PROMPT }]
