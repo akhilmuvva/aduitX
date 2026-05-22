@@ -1,0 +1,7 @@
+{
+  "siteId": "auditx-dashboard",
+  "build": {
+    "command": "npm run build",
+    "publish": "dist"
+  }
+}
