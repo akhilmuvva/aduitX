@@ -25,7 +25,7 @@ jobs:
           npm run build
 
       - name: Deploy to Fleek
-        uses: fleekhq/action-deploy@v1
+        uses: FleekHQ/action-deploy@v1.0.2
         with:
           apiKey: ${{ secrets.FLEEK_API_KEY }}
           workDir: dashboard
