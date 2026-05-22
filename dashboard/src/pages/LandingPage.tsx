@@ -117,7 +117,7 @@ export const LandingPage: React.FC = () => {
           </div>
 
           <div className="hidden md:flex items-center gap-8 text-xs text-gray-400 font-outfit">
-            <a href="#features" className="hover:text-white transition-colors">Features</a>
+
             <a href="#how-it-works" className="hover:text-white transition-colors">How It Works</a>
             <a href="https://github.com/akhilmuvva/auditX" target="_blank" rel="noreferrer"
               className="flex items-center gap-1.5 hover:text-white transition-colors">
@@ -246,51 +246,7 @@ export const LandingPage: React.FC = () => {
           </div>
         </section>
 
-        {/* ── FEATURES ── */}
-        <section id="features" className="max-w-7xl mx-auto px-6 py-20 border-t border-white/5">
-          <div className="text-center mb-14">
-            <p className="text-[10px] text-indigo-400 font-fira font-bold uppercase tracking-widest mb-3">Protocol Capabilities</p>
-            <h2 className="text-3xl font-extrabold text-white font-outfit">Enterprise-Grade Security</h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            <FeatureCard
-              icon={<FileCode className="w-5 h-5" />}
-              title="Multi-Tool Static Analysis"
-              desc="Slither AST detection, Mythril symbolic execution, and Surya call-graph mapping combine into a unified threat matrix."
-              tags={['Slither', 'Mythril Z3', 'Surya AST']}
-            />
-            <FeatureCard
-              icon={<Zap className="w-5 h-5" />}
-              title="Gemini AI Triage"
-              desc="Browser-native Gemini Flash analysis. CVSS 3.1 scoring, false-positive filtering, and gas-optimized remediation code."
-              tags={['Gemini Flash', 'CVSS 3.1', 'Custom Errors']}
-            />
-            <FeatureCard
-              icon={<Lock className="w-5 h-5" />}
-              title="On-Chain Attestation"
-              desc="EAS attestation on Base Sepolia seals your audit permanently. SVG NFT badge minted to your wallet address."
-              tags={['EAS V1', 'Base Sepolia', 'ERC-721']}
-            />
-            <FeatureCard
-              icon={<Globe className="w-5 h-5" />}
-              title="IPFS Immutable Storage"
-              desc="Full audit reports pinned to IPFS via Pinata. Content-addressed CIDs ensure tamper-proof permanent records."
-              tags={['IPFS', 'Pinata', 'Arweave']}
-            />
-            <FeatureCard
-              icon={<Shield className="w-5 h-5" />}
-              title="Zero-Server Architecture"
-              desc="No Express. No backend API. AI runs directly in your browser via Gemini API. Your key never leaves your machine."
-              tags={['Zero-Server', 'EIP-1193', 'localStorage']}
-            />
-            <FeatureCard
-              icon={<ExternalLink className="w-5 h-5" />}
-              title="Wallet-Gated Access"
-              desc="MetaMask authentication via EIP-1193. Connect wallet to access the dashboard and sign attestation transactions."
-              tags={['MetaMask', 'EIP-1193', 'SIWE']}
-            />
-          </div>
-        </section>
+
 
         {/* ── BOTTOM CTA ── */}
         <section className="max-w-7xl mx-auto px-6 py-24 text-center border-t border-white/5">
