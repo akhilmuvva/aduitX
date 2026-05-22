@@ -13,7 +13,8 @@
     "test": "jest --config jest.config.cjs",
     "test:siem": "jest --config jest.config.cjs test/siem.test.ts --verbose",
     "test:contracts": "npx hardhat test",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "deploy:dashboard": "vercel dashboard --prod"
   },
   "keywords": [],
   "author": "",
