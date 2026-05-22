@@ -9,6 +9,7 @@
     "dev": "ts-node --esm src/cli.ts server",
     "audit": "ts-node --esm src/cli.ts audit",
     "siem:monitor": "ts-node --esm src/cli.ts monitor",
+    "siem:stream": "ts-node --esm scripts/siemStreamer.ts",
     "test": "jest --config jest.config.cjs",
     "test:siem": "jest --config jest.config.cjs test/siem.test.ts --verbose",
     "test:contracts": "npx hardhat test",
