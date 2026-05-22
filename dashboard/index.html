@@ -5,6 +5,9 @@
     <link rel="icon" type="image/png" href="/icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     
+    <!-- CSP Security Policies -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https:; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: blob: https:; connect-src 'self' wss: ws: https:;" />
+    
     <!-- SEO Best Practices -->
     <title>AuditX — Decentralized Smart Contract Security Agent & Technology Stack</title>
     <meta name="description" content="AuditX is an autonomous security agent executing on-chain Solidity compiler checks, static analysis, symbolic solves, and attesting reports peer-to-peer." />
