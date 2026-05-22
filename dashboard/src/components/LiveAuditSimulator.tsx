@@ -1,8 +1,6 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useAuditStore, type UploadedFiles } from '../store/useAuditStore';
 import { useCyberSynth } from '../hooks/useCyberSynth';
-import { BadgeViewer } from './BadgeViewer';
-import { FindingsList } from './FindingsList';
 import {
   Play, RotateCcw, Upload, FileCode, FileJson,
   Eye, EyeOff, Key, ShieldCheck, ShieldX, AlertTriangle,
@@ -225,7 +223,7 @@ export const LiveAuditSimulator: React.FC = () => {
       <div className="bg-cyber-card border border-white/5 rounded-2xl p-5 backdrop-blur-md">
         <div className="flex items-center gap-2 mb-3">
           <Key className="w-4 h-4 text-indigo-400" />
-          <span className="text-xs font-bold text-gray-200 font-outfit uppercase tracking-wider">Anthropic API Key</span>
+          <span className="text-xs font-bold text-gray-200 font-outfit uppercase tracking-wider">Gemini API Key</span>
           <span className="ml-auto text-[9px] text-gray-600 font-fira">Stored in your browser only — never transmitted to any server</span>
         </div>
         <div className="flex gap-2">
@@ -235,7 +233,7 @@ export const LiveAuditSimulator: React.FC = () => {
               value={apiKeyDraft}
               onChange={(e) => setApiKeyDraft(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSaveKey()}
-              placeholder="sk-ant-api03-..."
+              placeholder="AIza..."
               className="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-2.5 text-xs text-gray-200 font-fira outline-none focus:border-indigo-400/50 placeholder:text-gray-600 transition-colors pr-10"
             />
             <button
@@ -256,7 +254,7 @@ export const LiveAuditSimulator: React.FC = () => {
         </div>
         {ApiKeyStore.isSet() && (
           <p className="text-[10px] text-emerald-400 font-fira mt-2 flex items-center gap-1">
-            <CheckCircle2 className="w-3 h-3" /> API key saved in localStorage
+            <CheckCircle2 className="w-3 h-3" /> Gemini API key saved in localStorage
           </p>
         )}
       </div>
@@ -299,7 +297,7 @@ export const LiveAuditSimulator: React.FC = () => {
                   slot="slither"
                   loaded={files.slither}
                   icon={<FileJson className="w-4 h-4" />}
-                  hint="Run: slither contract.sol --json slither.json"
+                  hint="slither contract.sol --json slither.json"
                   onLoad={readFile}
                   onClear={(slot) => setFile(slot, null)}
                   disabled={isRunning}
@@ -348,7 +346,7 @@ export const LiveAuditSimulator: React.FC = () => {
             <div className="bg-indigo-500/5 border border-indigo-400/10 rounded-xl px-4 py-3">
               <p className="text-[9px] font-bold text-indigo-400 font-outfit uppercase tracking-wider mb-1">Local CLI Runner</p>
               <p className="text-[10px] text-gray-500 font-fira leading-relaxed">
-                Generate tool outputs locally (no server needed):<br />
+                Generate tool JSONs locally (no server needed):<br />
                 <span className="text-indigo-300">node dist/cli.js --target contract.sol</span>
               </p>
             </div>
@@ -406,7 +404,7 @@ export const LiveAuditSimulator: React.FC = () => {
               </span>
               <span className="flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
-                Browser-Native AI
+                Gemini 2.0 Flash
               </span>
               <span className="flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
@@ -420,7 +418,7 @@ export const LiveAuditSimulator: React.FC = () => {
             <div className="flex justify-between items-center text-[10px] text-gray-500 font-bold uppercase font-fira pb-3 border-b border-white/5 mb-3">
               <span className="flex items-center gap-1.5">
                 <span className={`w-1.5 h-1.5 rounded-full ${isRunning ? 'bg-amber-400 animate-ping' : 'bg-gray-600'}`} />
-                LIVE AUDIT CONSOLE
+                GEMINI AUDIT CONSOLE
               </span>
               <span className="text-[9px] text-gray-600">
                 {terminalLogs.length} events

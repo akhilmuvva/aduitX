@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { runBrowserAITriage, ApiKeyStore, type AuditXReport } from '../lib/aiTriage';
+// AI engine: Google Gemini 2.0 Flash (browser-native, zero-server)
 
 export type SimStatus = 'IDLE' | 'RUNNING' | 'COMPLETED' | 'ERROR';
 
@@ -57,9 +58,9 @@ export const useAuditStore = create<AuditState>((set, get) => ({
 
   simStatus: 'IDLE',
   terminalLogs: [
-    { type: 'system', text: 'AuditX Decentralized Engine ready.', ts: Date.now() },
+    { type: 'system', text: 'AuditX Decentralized Engine ready — powered by Gemini 2.0 Flash.', ts: Date.now() },
     { type: 'system', text: 'Upload your .sol file — Slither/Mythril/Surya JSON outputs are optional.', ts: Date.now() },
-    { type: 'system', text: 'Your Anthropic API key never leaves your browser.', ts: Date.now() },
+    { type: 'system', text: 'Your Gemini API key is stored in localStorage only. It never leaves your browser.', ts: Date.now() },
   ],
   report: null,
 
@@ -93,7 +94,7 @@ export const useAuditStore = create<AuditState>((set, get) => ({
       return;
     }
     if (!apiKey.trim()) {
-      set((s) => ({ ...addLog(s, { type: 'error', text: 'Anthropic API key is required. Enter it in the Key panel above.' }) }));
+      set((s) => ({ ...addLog(s, { type: 'error', text: 'Gemini API key is required. Get one free at aistudio.google.com and enter it above.' }) }));
       return;
     }
 

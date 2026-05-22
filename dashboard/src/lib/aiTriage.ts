@@ -1,9 +1,8 @@
 /**
- * AuditX — Browser-Native AI Triage Engine
- * 
- * Calls Anthropic Claude directly from the browser (no server needed).
- * API key is stored in localStorage and never leaves the user's machine.
- * Returns a type-safe JSON payload ready for EAS + NFT minting.
+ * AuditX — Browser-Native AI Triage Engine (Google Gemini)
+ *
+ * Calls Google Gemini API directly from the browser — zero server needed.
+ * API key stored in localStorage only, never leaves the user's machine.
  */
 
 export interface AuditXReport {
@@ -41,27 +40,27 @@ export interface AuditXReport {
 }
 
 const SYSTEM_PROMPT = `ROLE: Autonomous Enterprise-Grade Web3 Security Protocol Architect & Auditor
-CONTEXT: Operating natively within a zero-server decentralized topology. Node execution data is processed via localized client daemons or distributed edge networks, channeling cryptographic parameters directly to a serverless Web3 UI wrapper (IPFS/Fleek/Arweave).
+CONTEXT: Operating natively within a zero-server decentralized topology.
 
-OBJECTIVE: You are the core analytical engine of the AuditX security protocol. Your mandate is to ingest raw Solidity source vectors alongside multi-tool telemetry matrices (Slither AST detections, Mythril symbolic execution violations, and Surya call-graph topological properties). You must autonomously deduplicate threat vulnerabilities, trace execution reachability, filter false positives, and return a structurally sound, type-safe JSON payload designed for direct browser-side block publication (EAS sealing and ERC-721 on-chain SVG Badge minting).
+OBJECTIVE: You are the core analytical engine of the AuditX security protocol. Ingest raw Solidity source vectors alongside multi-tool telemetry matrices (Slither AST detections, Mythril symbolic execution violations, Surya call-graph topological properties). Autonomously deduplicate threat vulnerabilities, trace execution reachability, filter false positives, and return a structurally sound, type-safe JSON payload for browser-side EAS sealing and ERC-721 SVG Badge minting.
 
-ENTERPRISE ARCHITECTURAL PARADIGMS:
-- ZERO RUNTIME SERVER BIAS: Do not assume an Express or stateful API backend handles errors, secrets, or data mutations. The output must interface directly with a frontend client communicating via client-side EIP-1193 JSON-RPC providers.
-- EXPLICIT THREAT BOUNDARIES: If the analyzed contract yields a single high or critical vulnerability threat vector (CVSS >= 7.0), flag certificationStatus as DENIED_RISK_TOO_HIGH.
+ENTERPRISE RULES:
+- ZERO RUNTIME SERVER BIAS: Output interfaces directly with EIP-1193 JSON-RPC providers.
+- EXPLICIT THREAT BOUNDARIES: If CVSS >= 7.0, set certificationStatus = DENIED_RISK_TOO_HIGH.
 
-TOPOLOGICAL MULTI-TOOL ENGINE CROSS-EXAMINATION:
-1. SURYA TRACE VISIBILITY CROSS-CHECK: Map every Slither and Mythril detection against Surya's visibility paths. If a vulnerability exists inside a function that is entirely internal/private and unreachable by an untrusted external msg.sender call path, classify as checked exception (low/none risk).
-2. SURYA EXTERNAL CALL ATTACK SURFACE INTERCEPTION: Trace every outward graph edge (.call, .transfer, .send). Cross-check if surrounding block violates Checks-Effects-Interactions pattern by mutating storage slots after that call node executes. If true, immediately flag Critical Reentrancy.
-3. LOGICAL SEPARATION & AGGREGATION: Deduplicate overlapping data. Fuse Slither structural bugs with Mythril mathematical edge cases to prevent redundant report indexing.
-4. TYPE-SAFE CVSS 3.1 SCALING: Calculate a precise aggregate risk metric. Convert final float index into strict integer scaled out of 100 (e.g., CVSS 4.2 becomes 42, 7.5 becomes 75) for Solidity uint8 storage compatibility.
+ANALYSIS STEPS:
+1. SURYA TRACE VISIBILITY CROSS-CHECK: Map Slither/Mythril detections against Surya visibility paths. If a vulnerable function is entirely internal/private and unreachable by external msg.sender, classify as low/none risk.
+2. SURYA EXTERNAL CALL ATTACK SURFACE: Trace every .call/.transfer/.send edge. If surrounding block mutates storage AFTER the call (violates CEI pattern), flag Critical Reentrancy.
+3. DEDUPLICATION: Merge overlapping Slither + Mythril findings. No redundant report entries.
+4. CVSS SCALING: Convert CVSS float to strict integer × 10 (e.g. CVSS 7.5 → 75) for Solidity uint8 compatibility.
 
-SOLIDITY PRODUCTION CONSTRAINTS:
-- GAS OPTIMIZATION: Eliminate legacy text-based require statements. Force implementation of gas-efficient Solidity 0.8.x Custom Errors.
-- RENDERING SAFEGUARDS: Validate contract names and IPFS hashes do not contain malformed strings.
+SOLIDITY REMEDIATION RULES:
+- Replace ALL require("string") with Solidity 0.8.x Custom Errors.
+- All remediation code must be gas-optimized.
 
-Return EXACTLY a raw JSON object. No markdown, no backticks, no explanations. Immediately parseable JSON only.
+CRITICAL: Return ONLY a raw JSON object. No markdown fences, no backticks, no explanations. Pure JSON only.
 
-Schema:
+JSON Schema to return:
 {
   "analyticsSummary": {
     "targetContractName": "String",
@@ -98,6 +97,10 @@ Schema:
   }
 }`;
 
+// Use gemini-2.0-flash for fast, cost-effective analysis
+const GEMINI_MODEL = 'gemini-2.0-flash';
+const GEMINI_API_BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
+
 export async function runBrowserAITriage(params: {
   contractName: string;
   solidityCode: string;
@@ -109,7 +112,7 @@ export async function runBrowserAITriage(params: {
 }): Promise<AuditXReport> {
   const { contractName, solidityCode, slitherOutput, mythrilOutput, suryaOutput, apiKey, onProgress } = params;
 
-  onProgress?.('[AI-TRIAGE] Constructing multi-tool telemetry matrix...');
+  onProgress?.('[GEMINI] Constructing multi-tool telemetry matrix...');
 
   const userContent = `
 CONTRACT NAME: ${contractName}
@@ -126,61 +129,76 @@ ${mythrilOutput || '(not provided — infer from source code patterns)'}
 === SURYA CALL GRAPH OUTPUT ===
 ${suryaOutput || '(not provided — derive call graph topology from source code)'}
 
-Perform full AuditX security analysis per your protocol mandate. Return only the raw JSON object.
+Perform full AuditX security analysis. Return ONLY the raw JSON object matching the schema — no markdown, no extra text.
 `.trim();
 
-  onProgress?.('[AI-TRIAGE] Transmitting to Claude analysis engine (zero-server, client-side)...');
+  onProgress?.('[GEMINI] Transmitting to Gemini analysis engine (browser-native, zero-server)...');
 
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
+  const url = `${GEMINI_API_BASE}/${GEMINI_MODEL}:generateContent?key=${apiKey}`;
+
+  const response = await fetch(url, {
     method: 'POST',
-    headers: {
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-direct-browser-access': 'true',
-      'content-type': 'application/json',
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      model: 'claude-sonnet-4-5',
-      max_tokens: 4096,
-      system: SYSTEM_PROMPT,
-      messages: [{ role: 'user', content: userContent }],
+      system_instruction: {
+        parts: [{ text: SYSTEM_PROMPT }]
+      },
+      contents: [
+        {
+          role: 'user',
+          parts: [{ text: userContent }],
+        },
+      ],
+      generationConfig: {
+        temperature: 0.2,
+        maxOutputTokens: 8192,
+        responseMimeType: 'application/json',
+      },
     }),
   });
 
   if (!response.ok) {
     const err = await response.json().catch(() => ({}));
-    throw new Error(`Claude API error ${response.status}: ${(err as any)?.error?.message || response.statusText}`);
+    const msg = (err as any)?.error?.message || response.statusText;
+    throw new Error(`Gemini API error ${response.status}: ${msg}`);
   }
 
   const data = await response.json();
-  const raw = (data.content?.[0]?.text || '').trim();
 
-  onProgress?.('[AI-TRIAGE] Parsing structured threat analysis payload...');
+  // Extract text from Gemini response structure
+  const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '';
 
-  // Strip any accidental markdown fences
+  if (!raw) {
+    throw new Error('Gemini returned an empty response. Check your API key and model quota.');
+  }
+
+  onProgress?.('[GEMINI] Parsing structured threat analysis payload...');
+
+  // Strip accidental markdown fences if model ignored responseMimeType
   const cleaned = raw.replace(/^```json?\s*/i, '').replace(/```\s*$/i, '').trim();
 
   let parsed: AuditXReport;
   try {
     parsed = JSON.parse(cleaned);
   } catch {
-    throw new Error(`AI returned malformed JSON. Raw output: ${raw.substring(0, 200)}`);
+    throw new Error(`Gemini returned malformed JSON. Preview: ${raw.substring(0, 300)}`);
   }
 
-  // Integrity checks
   if (!parsed.analyticsSummary || !parsed.vulnerabilities) {
-    throw new Error('AI response missing required schema fields.');
+    throw new Error('Gemini response is missing required AuditX schema fields.');
   }
 
-  onProgress?.(`[AI-TRIAGE] ✓ Analysis complete — Risk: ${parsed.analyticsSummary.riskClassification.toUpperCase()} | Status: ${parsed.analyticsSummary.certificationStatus}`);
+  onProgress?.(
+    `[GEMINI] ✓ Analysis complete — Risk: ${parsed.analyticsSummary.riskClassification.toUpperCase()} | Status: ${parsed.analyticsSummary.certificationStatus}`
+  );
 
   return parsed;
 }
 
-/** Store API key in localStorage (never sent to any server) */
+/** Store Gemini API key in localStorage (browser-only, never sent to any backend) */
 export const ApiKeyStore = {
-  get: () => localStorage.getItem('auditx_anthropic_key') || '',
-  set: (key: string) => localStorage.setItem('auditx_anthropic_key', key),
-  clear: () => localStorage.removeItem('auditx_anthropic_key'),
-  isSet: () => !!localStorage.getItem('auditx_anthropic_key'),
+  get: () => localStorage.getItem('auditx_gemini_key') || '',
+  set: (key: string) => localStorage.setItem('auditx_gemini_key', key),
+  clear: () => localStorage.removeItem('auditx_gemini_key'),
+  isSet: () => !!localStorage.getItem('auditx_gemini_key'),
 };
