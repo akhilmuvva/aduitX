@@ -43,8 +43,8 @@ export const DashboardPage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           {/* Logo */}
           <a href="/" className="flex items-center gap-3 group">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/25 group-hover:scale-105 transition-transform duration-300">
-              <Shield className="w-4 h-4 text-white" />
+            <div className="w-8 h-8 rounded-lg overflow-hidden border border-indigo-500/20 shadow-lg shadow-indigo-500/25 group-hover:scale-105 transition-transform duration-300">
+              <img src="/icon.png" alt="AuditX Logo" className="w-full h-full object-cover" />
             </div>
             <div>
               <span className="text-base font-extrabold tracking-tight text-white">AuditX</span>

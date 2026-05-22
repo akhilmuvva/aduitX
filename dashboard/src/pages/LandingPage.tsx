@@ -107,8 +107,8 @@ export const LandingPage: React.FC = () => {
       <nav className="relative z-50 border-b border-white/5 bg-[#07090F]/80 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/25">
-              <Shield className="w-4 h-4 text-white" />
+            <div className="w-8 h-8 rounded-lg overflow-hidden border border-indigo-500/20 shadow-lg shadow-indigo-500/25">
+              <img src="/icon.png" alt="AuditX Logo" className="w-full h-full object-cover" />
             </div>
             <div>
               <span className="text-base font-extrabold tracking-tight text-white">AuditX</span>
