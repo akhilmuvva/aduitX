@@ -1,0 +1,45 @@
+name: Decentralized Automated Deployment
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy-fleek:
+    name: Deploy to Fleek
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install Dependencies & Build
+        run: |
+          cd dashboard
+          npm install
+          npm run build
+
+      - name: Deploy to Fleek
+        uses: fleekhq/action-deploy@v1
+        with:
+          apiKey: ${{ secrets.FLEEK_API_KEY }}
+          projectSite: "auditx-dashboard"
+          buildFolder: "dashboard/dist"
+
+  trigger-4everland:
+    name: Trigger 4EVERLAND Webhook
+    runs-on: ubuntu-latest
+    needs: build-and-deploy-fleek
+    steps:
+      - name: Call 4EVERLAND Deploy Hook
+        if: ${{ env.FOUR_EVER_LAND_HOOK != '' }}
+        env:
+          FOUR_EVER_LAND_HOOK: ${{ secrets.FOUR_EVER_LAND_WEBHOOK_URL }}
+        run: |
+          echo "Triggering 4EVERLAND deployment..."
+          curl -X POST "$FOUR_EVER_LAND_HOOK"
